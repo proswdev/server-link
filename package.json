@@ -1,6 +1,6 @@
 {
   "name": "server-link",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Manage links between client and servers to allow client to wait until linked servers are ready",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,18 @@
     "type": "git",
     "url": "https://github.com/proswdev/server-link.git"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "server",
+    "client",
+    "container",
+    "link",
+    "links",
+    "depends_on",
+    "docker",
+    "ready",
+    "sync"
+  ],
   "dependencies": {
     "bluebird": "^3.4.7",
     "lodash": "^4.17.4",
