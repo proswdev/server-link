@@ -127,21 +127,21 @@ err.links = Array with an entry for each server the client is waiting for. The e
 ```javascript
 var serverLink = require('server-link');
 ```
-**serverLink(app, [status], [path])**
-Enables link support on the server
+**serverLink(app, [status], [path])**  
+Enables link support on the server  
 `app` specifies the express() application for the server  
 `status` indicates the initial server status (default 'online')  
 `path` is path on the server where link status requests are routed to (default '/serverlink')  
 Returns a serverLink instance for this app. Use property *instance*.status to get & set current server status
 
-**serverLink.wait(hosts, [path], [options])**
+**serverLink.wait(hosts, [path], [options])**  
 Waits until specified linked server(s) is/are ready.  
 `hosts` is either a string containing the host URL for a single linked server or an array of strings to wait for multiple servers. A host URL should only contain the base server URL with optional protocol and port but without path or trailing '/'.  
 `path` is path on the server(s) where link status request are routed to (default '/serverlink')  
 `options` are server retry options while waiting until ready. See [server link retry options](#server-link-retry-options) above for details.  
 Returns a promise that is resolved when all specified servers are ready or rejected if one ore more linked servers failed.
 
-**serverLink.get(host, [path])**
+**serverLink.get(host, [path])**  
 `host` specifies the host URL for the linked server. The URLshould only contain the base server URL with optional protocol and port but without path or trailing '/'.  
 `path` is path on the server where link status requests are routed to (default '/serverlink')  
 Returns a promise that is resolved with the current link status for specified server.
