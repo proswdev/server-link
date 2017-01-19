@@ -1,0 +1,31 @@
+{
+  "name": "server-link",
+  "version": "1.0.0",
+  "description": "Manage links between client and servers to allow client to wait until linked servers are ready",
+  "main": "index.js",
+  "scripts": {
+    "test": "/usr/lib/node_modules/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/proswdev/server-link.git"
+  },
+  "keywords": [],
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "lodash": "^4.17.4",
+    "promise-retry": "^1.1.1",
+    "superagent": "^3.3.2",
+    "superagent-as-promised": "^4.0.0"
+  },
+  "devDependencies": {
+    "express": "^4.14.0",
+    "should": "^11.1.2"
+  },
+  "author": "Eric Vandewater <ericv@prosoftwaredev.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/proswdev/server-link/issues"
+  },
+  "homepage": "https://github.com/proswdev/server-link"
+}
