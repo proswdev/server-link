@@ -1,7 +1,6 @@
 # server-link #
 
-Manage links between client and servers to allow client to wait until linked servers are ready
-
+Manage links between client and servers to allow client to wait until linked servers are ready.  
 Very useful for installations involving multiple servers that should start in a particular sequence.  
 Linked [Docker](http://www.docker.com) containers is a very typical use case for this.
 

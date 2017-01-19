@@ -1,7 +1,7 @@
 {
   "name": "server-link",
-  "version": "1.0.2",
-  "description": "Wait until all linked servers you depend on are ready",
+  "version": "1.0.3",
+  "description": "Wait until all linked servers your app depends on are ready",
   "main": "index.js",
   "scripts": {
     "test": "/usr/lib/node_modules/mocha"
