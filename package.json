@@ -1,7 +1,7 @@
 {
   "name": "server-link",
-  "version": "1.0.1",
-  "description": "Manage links between client and servers to allow client to wait until linked servers are ready",
+  "version": "1.0.2",
+  "description": "Wait until all linked servers you depend on are ready",
   "main": "index.js",
   "scripts": {
     "test": "/usr/lib/node_modules/mocha"
@@ -14,11 +14,12 @@
     "express",
     "server",
     "client",
-    "container",
     "link",
-    "links",
+    "linked",
+    "depend",
     "depends_on",
     "docker",
+    "container",
     "ready",
     "sync"
   ],
