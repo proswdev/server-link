@@ -4,13 +4,19 @@ Manage links between client and servers to allow client to wait until linked ser
 Very useful for installations involving multiple servers that should start in a particular sequence.  
 Linked [Docker](http://www.docker.com) containers is a very typical use case for this.
 
-## Installation ##
+- [Installation](#installation)
+- [Usage](#usage)
+- [Server link status](#server-link-status)
+- [Server link path](#server-link-path)
+- [API reference](#api-reference)
+
+## <a name="installation"></a>Installation ##
 
 ```
 $ npm install server-link
 ```
 
-## Usage ##
+## <a name="usage"></a>Usage ##
 
 Simply setup link support on server that client depends on:
 
@@ -54,7 +60,7 @@ require('server-link').wait([
   // Connection with one or more linked servers failed
 });
 ```
-## Server link status ##
+## <a name="server-link-status"></a>Server link status ##
 By default, server is assumed to be ready as soon as it starts listening on a socket and routing incoming requests. This behavior can be changed by providing a link status during setup as follows:
 
 ```javascript
@@ -84,7 +90,7 @@ require('server-link').get('http://someserver.com:300').then(function(status) {
   console.log('link status=' + status);
 });
 ```
-## Server link path ##
+## <a name="server-link-path"></a>Server link path ##
 By default, link status requests are routed through path `'/serverlink'` on the server. A custom path can be used as long as both the client and server are setup with the same path as follows: 
 ```javascript
 // == Server application ==
@@ -95,7 +101,8 @@ require('server-link')(app, '', '/custom/link/path');
 require('server-link').wait('http://someserver.com:3000', '/custom/link/path');
 ```
 Please note that server URL should not contain any path or trailing '/' and custom path should start with '/'.
-## Server link retry options ##
+
+## <a name="server-retry-options"></a>Server link retry options ##
 Server-link uses NPM package [retry](https://www.npmjs.com/package/retry) to perform retries during waits by the client until the linked server is ready. Retry options can be specified in the wait call and are passed on directly to this package:
 ```javascript
 // == Client application ==
@@ -108,7 +115,8 @@ require('server-link').wait('http://someserver.com:3000', {
 );
 ```
 Please see the [retry](https://www.npmjs.com/package/retry) package for option details.
-## Server link errors ##
+
+## <a name="server-link-errors"></a>Server link errors ##
 Attempts by the client to wait for a linked server could result in the returned promise to be rejected with various errors. In addition to the typical network related errors, server-link my also report one of the following error instances:
 - err.code = 'LINKNOTREADY' - Max wait time/retries reached before server reported status 'online'  
 err.number = Number of times client tried to poll the server before failure
@@ -122,7 +130,7 @@ err.number = Number of times client tried to poll the server before failure
 - err.code = 'LINKSNOTREADY' - Wait for multiple servers failed for one or more servers  
 err.links = Array with an entry for each server the client is waiting for. The entry will contain an error instance as specified above if a link with the corresponding server failed.
 
-## API reference ##
+## <a name="api-reference"></a>API reference ##
 ```javascript
 var serverLink = require('server-link');
 ```
