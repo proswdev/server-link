@@ -122,6 +122,7 @@ err.number = Number of times client tried to poll the server before failure
 
 - err.code = 'LINKSNOTREADY' - Wait for multiple servers failed for one or more servers  
 err.links = Array with an entry for each server the client is waiting for. The entry will contain an error instance as specified above if a link with the corresponding server failed.
+
 ## API reference ##
 ```javascript
 var serverLink = require('server-link');
