@@ -2,7 +2,7 @@
 
 Manage links between client and servers to allow client to wait until linked servers are ready
 
-Very useful for installations involving multiple servers that should start in a particular sequence.
+Very useful for installations involving multiple servers that should start in a particular sequence.  
 Linked [Docker](http://www.docker.com) containers is a very typical use case for this.
 
 ## Installation ##
@@ -111,16 +111,16 @@ require('server-link').wait('http://someserver.com:3000', {
 Please see the [retry](https://www.npmjs.com/package/retry) package for option details.
 ## Server link errors ##
 Attempts by the client to wait for a linked server could result in the returned promise to be rejected with various errors. In addition to the typical network related errors, server-link my also report one of the following error instances:
-- err.code = 'LINKNOTREADY' - Max wait time/retries reached before server reported status 'online'
+- err.code = 'LINKNOTREADY' - Max wait time/retries reached before server reported status 'online'  
 err.number = Number of times client tried to poll the server before failure
 
-- err.code = 'LINKINVALID' - Server sent invalid response to link status requests
+- err.code = 'LINKINVALID' - Server sent invalid response to link status requests  
 err.number = Number of times client tried to poll the server before failure
 
-- err.code = 'LINKERROR' - Server reported an internal error
+- err.code = 'LINKERROR' - Server reported an internal error  
 err.number = Number of times client tried to poll the server before failure
 
-- err.code = 'LINKSNOTREADY' - Wait for multiple servers failed for one or more servers
+- err.code = 'LINKSNOTREADY' - Wait for multiple servers failed for one or more servers  
 err.links = Array with an entry for each server the client is waiting for. The entry will contain an error instance as specified above if a link with the corresponding server failed.
 ## API reference ##
 ```javascript
@@ -128,19 +128,19 @@ var serverLink = require('server-link');
 ```
 **serverLink(app, [status], [path])**
 Enables link support on the server
-`app` specifies the express() application for the server
-`status` indicates the initial server status (default 'online')
-`path` is path on the server where link status requests are routed to (default '/serverlink')
+`app` specifies the express() application for the server  
+`status` indicates the initial server status (default 'online')  
+`path` is path on the server where link status requests are routed to (default '/serverlink')  
 Returns a serverLink instance for this app. Use property *instance*.status to get & set current server status
 
 **serverLink.wait(hosts, [path], [options])**
-Waits until specified linked server(s) is/are ready.
-`hosts` is either a string containing the host URL for a single linked server or an array of strings to wait for multiple servers. A host URL should only contain the base server URL with optional protocol and port but without path or trailing '/'.
-`path` is path on the server(s) where link status request are routed to (default '/serverlink')
-`options` are server retry options while waiting until ready. See [server link retry options](#server-link-retry-options) above for details.
+Waits until specified linked server(s) is/are ready.  
+`hosts` is either a string containing the host URL for a single linked server or an array of strings to wait for multiple servers. A host URL should only contain the base server URL with optional protocol and port but without path or trailing '/'.  
+`path` is path on the server(s) where link status request are routed to (default '/serverlink')  
+`options` are server retry options while waiting until ready. See [server link retry options](#server-link-retry-options) above for details.  
 Returns a promise that is resolved when all specified servers are ready or rejected if one ore more linked servers failed.
 
 **serverLink.get(host, [path])**
-`host` specifies the host URL for the linked server. The URLshould only contain the base server URL with optional protocol and port but without path or trailing '/'.
-`path` is path on the server where link status requests are routed to (default '/serverlink')
+`host` specifies the host URL for the linked server. The URLshould only contain the base server URL with optional protocol and port but without path or trailing '/'.  
+`path` is path on the server where link status requests are routed to (default '/serverlink')  
 Returns a promise that is resolved with the current link status for specified server.
