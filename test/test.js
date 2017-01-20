@@ -110,9 +110,12 @@ describe("server-link", function() {
     .catch(function(err) {
       err.code.should.equal('LINKSNOTREADY');
       err.links.should.be.an.Array();
-      err.links.length.should.equal(2);
-      err.links[0].should.be.an.instanceOf(Error);
-      err.links[1].should.be.an.instanceOf(Error);
+      if (err.links[0]) {
+        err.links[0].should.be.an.instanceOf(Error);
+      }
+      if (err.links[1]) {
+        err.links[1].should.be.an.instanceOf(Error);
+      }
     })
     .finally(function() {
       server1.close();
