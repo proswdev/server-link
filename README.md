@@ -8,6 +8,9 @@ Linked [Docker](http://www.docker.com) containers is a very typical use case for
 - [Usage](#usage)
 - [Server link status](#server-link-status)
 - [Server link path](#server-link-path)
+- [Server link retry options](#server-retry-options)
+- [Link to external servers](#external-server-links)
+- [Server link errors]($server-link-errors)
 - [API reference](#api-reference)
 
 ## <a name="installation"></a>Installation ##
@@ -18,7 +21,7 @@ $ npm install server-link
 
 ## <a name="usage"></a>Usage ##
 
-Simply setup link support on server that client depends on:
+For internal servers, simply setup link support on server that client depends on:
 
 ```javascript
 // == Server application ==
@@ -44,7 +47,20 @@ require('server-link').wait('http://localhost:3000').then(function() {
   // Connection with linked server failed 
 });
 ```
-
+Provide a custom linker function to link with external servers you do not control. Server-link will handle all retries and timeouts.
+```javascript
+// == Client application ==
+require('server-link').wait('http://localhost:3000', function(host) {
+  // Handle your own server connection
+  // The linker function and return values are explained below
+  return my_server_connection(host);
+}).then(function() {
+  // Linked server is ready
+})
+.catch(function(err) {
+  // Connection with linked server failed 
+});
+```
 Client can wait for multiple servers. The returned promise isn't resolved until all linked servers are ready:
 
 ```javascript
@@ -116,6 +132,35 @@ require('server-link').wait('http://someserver.com:3000', {
 ```
 Please see the [retry](https://www.npmjs.com/package/retry) package for option details.
 
+## <a name="external-server-links"></a>Link to external servers ##
+If you don't own the server that you're linking to, you're most likely not able to install link support on it as described above. Instead, a custom linker function can be provided in the wait call to handle your own server connection and translate it to a status value that server-link will understand and process accordingly, just like links with internal servers:
+```javascript
+// == Client application ==
+require('server-link').wait([
+  'http://www.internal.com:3000', 
+  'http://www.external.com:4000'
+], function(host, index) {
+    // Return nothing for internal server (index 0) to have
+    // server-link handle the default connection instead
+    if (index == 1) {
+      // Perform custom connection and return a server-link status
+      return connect_my_db(host).then(function(ready) {
+        return ready ? 'online' : 'starting';
+      })
+      .catch(function() {
+        return 'error';
+      });
+    }
+})
+.then(function() {
+  // All linked servers are ready
+})
+.catch(function(err) {
+  // Connection with one or more linked servers failed
+});
+```
+The linker function is called for each host specified in the list. If the function returns nothing, server-link assumes it is an internal server with link support enabled and it will handle the connection instead. If the function returns a promise or a link status, server-link will succeed, fail or retry based on the status just as with any internal servers.
+
 ## <a name="server-link-errors"></a>Server link errors ##
 Attempts by the client to wait for a linked server could result in the returned promise to be rejected with various errors. In addition to the typical network related errors, server-link my also report one of the following error instances:
 - err.code = 'LINKNOTREADY' - Max wait time/retries reached before server reported status 'online'  
@@ -141,12 +186,21 @@ Enables link support on the server
 `path` is path on the server where link status requests are routed to (default '/serverlink')  
 Returns a serverLink instance for this app. Use property *instance*.status to get & set current server status
 
-**serverLink.wait(hosts, [path], [options])**  
+**serverLink.wait(hosts, [path], [options], [linker])**  
 Waits until specified linked server(s) is/are ready.  
 `hosts` is either a string containing the host URL for a single linked server or an array of strings to wait for multiple servers. A host URL should only contain the base server URL with optional protocol and port but without path or trailing '/'.  
 `path` is path on the server(s) where link status request are routed to (default '/serverlink')  
 `options` are server retry options while waiting until ready. See [server link retry options](#server-link-retry-options) above for details.  
-Returns a promise that is resolved when all specified servers are ready or rejected if one ore more linked servers failed.
+`linker` is a function (see below) that will be called for each host in the list to handle the connection with external servers
+Returns a promise that is resolved when all specified servers are ready or rejected as soon as one ore more server links failed.
+
+**linker(host, index, number)**  
+Called for each host specified in the call to `serverlink.wait` to handle the server connection  
+`host` is the URL of the host to connect to  
+`index` in the index in the list of hosts specified in `serverlink.wait`  
+`number` is the retry count for this connection  
+Returns a link status string or a promise that will resolve/reject a link status.  
+Use `this.hosts`, `this.path` and `this.options` in the linker function to access the arguments passed to the `serverlink.wait` call.
 
 **serverLink.get(host, [path])**  
 `host` specifies the host URL for the linked server. The URLshould only contain the base server URL with optional protocol and port but without path or trailing '/'.  

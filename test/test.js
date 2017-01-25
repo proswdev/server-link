@@ -54,7 +54,10 @@ describe("server-link", function() {
     var port2 = PORT + 1;
     var server1 = app1.listen(port1);
     var server2 = app2.listen(port2);
-    return ServerLink.wait(['localhost:' + port1, 'localhost:' + port2]).then(function(results) {
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'localhost:' + port2
+    ]).then(function(results) {
       return results.should.eql(['online', 'online']);
     })
     .finally(function() {
@@ -72,8 +75,66 @@ describe("server-link", function() {
     var port2 = PORT + 1;
     var server1 = app1.listen(port1);
     var server2 = app2.listen(port2);
-    return ServerLink.wait(['localhost:' + port1, 'localhost:' + port2], '/mylink').then(function(results) {
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'localhost:' + port2
+    ], '/mylink').then(function(results) {
       return results.should.eql(['online', 'online']);
+    })
+    .finally(function() {
+      server1.close();
+      server2.close();
+    });
+  });
+
+  it ('should establish link with custom linker', function() {
+    var retries = 0;
+    return ServerLink.wait('dummyHost', retry2, function(host, index, number) {
+      host.should.eql('dummyHost');
+      index.should.eql(0);
+      number.should.eql(++retries);
+      this.should.match({
+        hosts: [ host ],
+        path: '/serverlink',
+        options: retry2
+      });
+      return retries < 2 ? 'starting' : 'online';
+    }).then(function(results) {
+      retries.should.equal(2);
+      return results.should.equal('online');
+    })
+  });
+
+  it ('should establish multiple links with custom linker', function() {
+    var app1 = express();
+    var app2 = express();
+    ServerLink(app1);
+    ServerLink(app2);
+    var port1 = PORT;
+    var port2 = PORT + 1;
+    var server1 = app1.listen(port1);
+    var server2 = app2.listen(port2);
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'custom1',
+      'localhost:' + port2,
+      'custom2'
+    ], retry2, function(host, index, number) {
+      index.should.be.below(4);
+      if (index === 1) {
+        host.should.equal('custom1');
+        number.should.equal(1);
+        return 'online';
+      }
+      else if (index === 3) {
+        host.should.equal('custom2');
+        number.should.be.belowOrEqual(2);
+        return new Promise(function(resolve) {
+          resolve(number < 2 ? 'starting' : 'online');
+        })
+      }
+    }).then(function(results) {
+      return results.should.eql(['online', 'online', 'online', 'online']);
     })
     .finally(function() {
       server1.close();
@@ -104,7 +165,10 @@ describe("server-link", function() {
     var port2 = PORT + 1;
     var server1 = app1.listen(port1);
     var server2 = app2.listen(port2);
-    return ServerLink.wait(['localhost:' + port1, 'localhost:' + port2], retry1).then(function(results) {
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'localhost:' + port2
+    ], retry1).then(function(results) {
       throw new Error('link should have failed');
     })
     .catch(function(err) {
@@ -149,7 +213,10 @@ describe("server-link", function() {
     var port2 = PORT + 1;
     var server1 = app1.listen(port1);
     var server2 = app2.listen(port2);
-    return ServerLink.wait(['localhost:' + port1, 'localhost:' + port2], retry2).then(function() {
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'localhost:' + port2
+    ], retry2).then(function() {
       throw new Error('link should have failed');
     })
     .catch(function(err) {
@@ -160,9 +227,58 @@ describe("server-link", function() {
       err.links[1].should.be.an.instanceOf(Error);
       err.links[1].retries.should.equal(3);
       link2.status = 'online';
-      return ServerLink.wait(['localhost:' + port1, 'localhost:' + port2]).then(function(results) {
+      return ServerLink.wait([
+        'localhost:' + port1,
+        'localhost:' + port2
+      ]).then(function(results) {
         return results.should.eql(['online', 'online']);
       });
+    })
+    .finally(function() {
+      server1.close();
+      server2.close();
+    });
+  });
+
+  it ('should report errors correctly with multiple links and custom linker', function() {
+    var app1 = express();
+    var app2 = express();
+    ServerLink(app1);
+    ServerLink(app2);
+    var port1 = PORT;
+    var port2 = PORT + 1;
+    var server1 = app1.listen(port1);
+    var server2 = app2.listen(port2);
+    return ServerLink.wait([
+      'localhost:' + port1,
+      'custom1',
+      'localhost:' + port2,
+      'custom2'
+    ], retry2, function(host, index, number) {
+      index.should.be.below(4);
+      if (index === 1) {
+        host.should.equal('custom1');
+        number.should.equal(1);
+        return 'online';
+      }
+      else if (index === 3) {
+        host.should.equal('custom2');
+        number.should.be.belowOrEqual(3);
+        return new Promise(function(resolve) {
+          resolve('offline');
+        })
+      }
+    }).then(function(results) {
+      throw new Error('link should have failed');
+    }).catch(function(err) {
+      err.code.should.equal('LINKSNOTREADY');
+      err.links.should.be.an.Array();
+      err.links.length.should.equal(4);
+      err.links[0].should.equal('online');
+      err.links[1].should.equal('online');
+      err.links[2].should.equal('online');
+      err.links[3].should.be.an.instanceOf(Error);
+      err.links[3].retries.should.equal(3);
     })
     .finally(function() {
       server1.close();
